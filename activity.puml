@@ -2,68 +2,6 @@
 
 title Order Fulfillment System - Activity Diagram (Multi-Start)
 
-|Maintainer|
-start
-:Selects action\n(Create/Update/Delete Product);
-|System|
-
-if (Action?) then (Create Product)
-    :Displays Create Product screen;
-    |Maintainer|
-    :Enters product details\n(title, type, price);
-    |System|
-    if (Product type?) then (Book)
-        |Maintainer|
-        :Enters Publisher, Year;
-    elseif (Software)
-        |Maintainer|
-        :Enters Platform, Media;
-    elseif (Toy)
-        |Maintainer|
-        :Enters Sex, Box Size, Weight;
-    endif
-    |System|
-    :Validates data;
-    if (Product exists?) then (Yes)
-        :Displays "Product Exists" error;
-        stop
-    else (No)
-        :Creates product record;
-    endif
-
-elseif (Update Product)
-    :Displays Search screen;
-    |Maintainer|
-    :Enters Product ID;
-    |System|
-    if (Product found?) then (Yes)
-        :Displays product details;
-        |Maintainer|
-        :Modifies information;
-        |System|
-        :Updates record;
-    else (No)
-        :Displays "Not Found" error;
-    endif
-
-elseif (Delete Product)
-    |Maintainer|
-    :Enters Product ID;
-    |System|
-    if (Product found?) then (Yes)
-        if (Outstanding orders?) then (Yes)
-            :Displays "Order exists" error;
-        else (No)
-            |Maintainer|
-            :Confirms deletion;
-            |System|
-            :Deletes record;
-        endif
-    else (No)
-        :Displays "Not Found" error;
-    endif
-endif
-
 |Clerk|
 start
 :Selects "Process Order";
