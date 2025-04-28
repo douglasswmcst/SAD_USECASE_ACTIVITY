@@ -1,16 +1,16 @@
-@startuml OrderFulfillmentActivityDiagram_Swimlanes
+@startuml OrderFulfillmentActivityDiagram_Final
 
-title Order Fulfillment System - Activity Diagram with Swimlanes
+title Order Fulfillment System - Activity Diagram (Multi-Start)
 
 |Maintainer|
 start
-:Selects action (Create/Update/Delete Product);
+:Selects action\n(Create/Update/Delete Product);
 |System|
 
 if (Action?) then (Create Product)
     :Displays Create Product screen;
     |Maintainer|
-    :Enters product details (title, type, price);
+    :Enters product details\n(title, type, price);
     |System|
     if (Product type?) then (Book)
         |Maintainer|
@@ -62,32 +62,32 @@ elseif (Delete Product)
     else (No)
         :Displays "Not Found" error;
     endif
+endif
 
-elseif (Process Order)
+|Clerk|
+start
+:Selects "Process Order";
+|System|
+:Displays order entry screen;
+|Clerk|
+:Enters customer/order details;
+|System|
+:Validates data;
+|Finance System|
+:Validates credit worthiness;
+|System|
+if (Credit approved?) then (No)
+    :Cancels order;
+    :Stores cancelled order;
+    stop
+else (Yes)
+    :Retrieves product details;
+    |Delivery System|
+    :Arranges delivery;
+    |System|
+    :Stores order with status;
     |Clerk|
-    :Selects "Process Order";
-    |System|
-    :Displays order entry screen;
-    |Clerk|
-    :Enters customer/order details;
-    |System|
-    :Validates data;
-    |Finance System|
-    :Validates credit worthiness;
-    |System|
-    if (Credit approved?) then (No)
-        :Cancels order;
-        :Stores cancelled order;
-        stop
-    else (Yes)
-        :Retrieves product details;
-        |Delivery System|
-        :Arranges delivery;
-        |System|
-        :Stores order with status;
-        |Clerk|
-        :Views order status;
-    endif
+    :Views order status;
 endif
 
 stop
