@@ -1,0 +1,39 @@
+@startuml StationeryStoreInventorySystem
+
+left to right direction
+skinparam packageStyle rectangle
+
+actor Employee as "Employee"
+actor DepartmentHead as "Department Head"
+actor StoreClerk as "Store Clerk"
+actor DepartmentRep as "Department Representative"
+
+rectangle "Stationery Store Inventory System" {
+    usecase "Submit Stationery Request" as UC1
+    usecase "Approve Stationery Request" as UC2
+    usecase "Process Requisition" as UC3
+    usecase "Generate Retrieval Form" as UC4
+    usecase "Update Inventory" as UC5
+    usecase "Generate Disbursement List" as UC6
+    usecase "Notify Request Status" as UC7
+    usecase "Acknowledge Receipt" as UC8
+    
+    UC1 ..> UC2 : <<include>>
+    UC3 ..> UC4 : <<include>>
+    UC3 ..> UC5 : <<include>>
+    UC3 ..> UC6 : <<include>>
+    UC6 ..> UC7 : <<include>>
+}
+
+Employee --> UC1
+DepartmentHead --> UC2
+StoreClerk --> UC3
+StoreClerk --> UC4
+StoreClerk --> UC5
+StoreClerk --> UC6
+DepartmentRep --> UC8
+System --> UC7 : notifies
+UC7 --> Employee : notifies
+UC7 --> DepartmentRep : notifies
+
+@enduml

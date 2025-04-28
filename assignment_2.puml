@@ -1,0 +1,98 @@
+@startuml OrderFulfillmentSystem
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #F5F5F5
+  BorderColor #333
+}
+
+' Define actors in logical groups
+actor Clerk as clerk
+actor Maintainer as maintainer
+
+actor "Finance System" as finance #lightblue
+actor "Delivery System" as delivery #lightblue
+actor "Inventory System" as inventory #lightblue
+actor "Product System" as product #lightblue
+
+actor Manager as manager
+actor Scheduler as scheduler
+
+rectangle "Order Fulfillment System" {
+    ' Group related use cases
+    package "Product Management" {
+        usecase "Maintain Product" as maintain_product
+        usecase "Create Product" as create_product
+        usecase "Update Product" as update_product
+        usecase "Delete Product" as delete_product
+        usecase "Retrieve Product" as retrieve_product
+        
+        maintain_product <|-- create_product
+        maintain_product <|-- update_product
+        maintain_product <|-- delete_product
+        maintain_product <|-- retrieve_product
+    }
+    
+    package "Order Processing" {
+        usecase "Process Order" as process_order
+        usecase "View Product Details" as view_products
+        usecase "Validate Credit-Worthiness" as validate_credit
+        usecase "Arrange Delivery" as arrange_delivery
+        usecase "Cancel Order" as cancel_order
+        usecase "Notify Order Cancellation" as cancel_order_notify
+        
+        view_products .> process_order : <<extend>>
+        cancel_order .> process_order : <<extend>>
+        arrange_delivery .> process_order : <<extend>>
+        process_order --> validate_credit
+        cancel_order --> cancel_order_notify
+        
+        
+    }
+    
+    package "Order Tracking" {
+        usecase "Track Order Status" as track_status
+        usecase "Update Order Status" as update_status
+
+        product --> update_status
+    }
+    
+    package "Reporting" {
+        usecase "Process Outstanding Order" as process_outstanding
+        usecase "Send Outstanding Order" as send_outstanding
+        usecase "Print Monthly Report" as print_report
+        usecase "Archive Order" as archive_order
+        usecase "Notify Monthly Report Complied" as notify_manager_monthly_report
+        
+        process_outstanding --> send_outstanding : <<include>>
+        print_report --> notify_manager_monthly_report : <<include>>
+    }
+
+}
+
+' Connect actors to use cases with clearer paths
+maintainer --> maintain_product
+clerk --> process_order
+clerk --> track_status
+scheduler --> archive_order
+scheduler --> process_outstanding
+scheduler --> print_report
+cancel_order_notify --> product
+
+notify_manager_monthly_report --> manager
+
+' External system connections
+validate_credit --> finance
+arrange_delivery --> delivery
+process_order --> inventory
+delivery --> product
+inventory --> product
+clerk --> maintainer
+manager --> maintainer
+
+@enduml
