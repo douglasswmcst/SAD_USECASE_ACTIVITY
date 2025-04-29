@@ -1,0 +1,27 @@
+@startuml Order State
+skinparam state {
+  BackgroundColor LightBlue
+  BorderColor Black
+  FontName Arial
+}
+
+[*] --> OrderCreated
+OrderCreated --> PendingCreditValidation : System validates data format
+PendingCreditValidation --> CreditRejected : Customer fails credit check
+PendingCreditValidation --> CreditApproved : Customer passes credit check
+CreditRejected --> Cancelled
+CreditApproved --> StockCheck : System notifies Delivery System
+StockCheck --> PendingReplenishment : Insufficient stock
+StockCheck --> PendingDelivery : Sufficient stock
+PendingReplenishment --> PendingDelivery : Inventory System updates status
+PendingDelivery --> Delivered : Delivery System updates status
+Delivered --> Archived : Quarterly job archives orders > 1 year old
+Cancelled --> [*]
+
+OrderCreated -down-> Cancelled : Clerk cancels order
+CreditApproved -down-> Cancelled : Clerk cancels order
+StockCheck -down-> Cancelled : Clerk cancels order
+PendingReplenishment -down-> Cancelled : Clerk cancels order
+PendingDelivery -down-> Cancelled : Clerk cancels order
+
+@enduml

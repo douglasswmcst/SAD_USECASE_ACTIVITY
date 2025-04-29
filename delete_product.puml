@@ -1,26 +1,44 @@
 @startuml DeleteProductSequence
 actor Maintainer
-participant "OrderFulfillmentSystem" as OFS
-participant "ProductDB" as DB
-participant "OrderDB" as ODB
+boundary "DeleteProductUI" as UI
+control "ProductController" as Controller
+entity "Product" as Product
+entity "Order" as Order
 
-Maintainer -> OFS: Select "Delete Product"
-OFS --> Maintainer: Prompt for Product ID
-Maintainer -> OFS: Enter Product ID
-OFS -> DB: Retrieve Product Details
+Maintainer -> UI: 1. Select "Delete Product"
+activate UI
+UI --> Maintainer: Display Product ID input form
+
+Maintainer -> UI: 2. Enter Product ID
+activate UI
+UI -> Controller: deleteProductRequest(productId)
+activate Controller
+
+Controller -> Product: 3. findById(productId)
+activate Product
 alt Product Found
-    DB --> OFS: Product Details
-    OFS -> ODB: Check for Outstanding Orders
+    Product --> Controller: Product details
+    Controller -> Order: checkOrdersForProduct(productId)
+    activate Order
     alt No Orders Exist
-        ODB --> OFS: Confirmation
-        OFS -> DB: Delete Product
-        OFS --> Maintainer: Success Message
+        Order --> Controller: false (no orders)
+        Controller -> Product: 6. delete()
+        Product --> Controller: confirmation
+        Controller --> UI: successMessage
+        UI --> Maintainer: "Product deleted successfully"
     else Orders Exist
-        ODB --> OFS: Error
-        OFS --> Maintainer: "Order Item Exists, Deletion Not Allowed"
+        Order --> Controller: true (orders exist)
+        Controller --> UI: errorMessage
+        deactivate Order
+        UI --> Maintainer: 5.1 "Order item exists, deletion not allowed"
     end
 else Product Not Found
-    DB --> OFS: Error
-    OFS --> Maintainer: "Product Not Found"
+    Product --> Controller: null
+    Controller --> UI: errorMessage
+    UI --> Maintainer: "Product not found"
 end
+
+deactivate Product
+deactivate Controller
+deactivate UI
 @enduml

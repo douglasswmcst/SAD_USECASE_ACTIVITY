@@ -1,21 +1,98 @@
-@startuml ProcessOrderSequence
-actor Clerk
-participant "OrderFulfillmentSystem" as OFS
-participant "FinanceSystem" as FS
-participant "DeliverySystem" as DS
+@startuml OrderFulfillmentClassDiagram
 
-Clerk -> OFS: Process Order (Customer Details, PO Items)
-OFS -> OFS: Validate Data Format
-OFS -> FS: Validate Credit Worthiness
-alt Credit Approved
-    OFS -> OFS: Retrieve Product Details
-    OFS -> DS: Deliver Goods (Customer, PO, Product Details)
-    DS --> OFS: Delivery Status
-    OFS -> OFS: Store PO with Status
-    OFS --> Clerk: Order Status
-else Credit Rejected
-    FS --> OFS: Error Message
-    OFS -> OFS: Cancel and Store PO
-    OFS --> Clerk: Order Cancelled
-end
+' ==== Classes ====
+class Clerk {
+  + acknowledgeMessage()
+}
+
+class OrderEntryScreen {
+  + displayForm()
+  + submitOrder(customerDetails, items)
+  + showStatus(status: String)
+  + showError(reason: String)
+}
+
+class OrderController {
+  + validateDataFormat(customerDetails, items): boolean
+  + processOrder(customerDetails, items)
+  + cancelOrder(reason: String)
+}
+
+class PurchaseOrder {
+  - orderId: String
+  - status: String
+  - dateReceived: Date
+  + create(customerDetails, items, productDetails)
+  + updateStatus(deliveryStatus: String)
+  + markCancelled(reason: String)
+}
+
+class Customer {
+  - name: String
+  - address: String
+  - phone: String
+  - contactPerson: String
+}
+
+class OrderItem {
+  - productId: String
+  - quantity: int
+  - totalPrice: float
+}
+
+class Product {
+  - id: String
+  - type: String
+  - title: String
+  - handlingInstructions: String
+  + getDetails(): ProductDetails
+}
+
+class FinanceSystem {
+  + checkCreditWorthiness(customer: Customer): (approved: boolean, reason?: String)
+}
+
+class DeliverySystem {
+  + scheduleDelivery(
+    customer: Customer,
+    orderId: String,
+    products: List<ProductDeliveryInfo>
+  ): deliveryStatus: String
+}
+
+class ProductDeliveryInfo {
+  - productId: String
+  - quantity: int
+  - type: String
+  - title: String
+  - handlingInstructions: String
+}
+
+' ==== Relationships ====
+Clerk --> OrderEntryScreen : "Uses"
+OrderEntryScreen --> OrderController : "1. Submits to"
+OrderController --> PurchaseOrder : "2. Creates/Updates"
+OrderController --> FinanceSystem : "3. Validates Credit"
+OrderController --> Product : "4. Fetches Details"
+OrderController --> DeliverySystem : "5. Requests Delivery"
+PurchaseOrder "1" *-- "1" Customer : "Contains"
+PurchaseOrder "1" *-- "*" OrderItem : "Has Items"
+DeliverySystem ..> ProductDeliveryInfo : "Uses"
+Product ..> ProductDeliveryInfo : "Converts to"
+
+' ==== Notes ====
+note top of OrderController
+  Responsibilities:
+  1. Validate input
+  2. Coordinate systems
+  3. Handle alternate flows (e.g., credit rejection)
+end note
+
+note right of DeliverySystem
+  Returns statuses:
+  - "Scheduled"
+  - "Failed: Insufficient Stock"
+  - "Failed: Address Invalid"
+end note
+
 @enduml

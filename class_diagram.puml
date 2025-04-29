@@ -1,66 +1,98 @@
 @startuml OrderFulfillmentClassDiagram
-class Maintainer {
-    + maintainerId: String
-    + name: String
-}
 
+' ==== Classes ====
 class Clerk {
-    + clerkId: String
-    + name: String
+  + acknowledgeMessage()
 }
 
-class Product {
-    + productId: String
-    + title: String
-    + type: Enum<Book, Software, Toy>
-    + unitPrice: Double
+class OrderEntryScreen {
+  + displayOrderForm()
+  + submitOrder()
+  + showStatus()
 }
 
-class Book {
-    + publisher: String
-    + yearOfPublishing: Integer
-}
-
-class Software {
-    + platform: String
-    + media: String
-}
-
-class Toy {
-    + sex: String
-    + boxSize: String
-    + weight: Double
+class OrderController {
+  + validateDataFormat()
+  + processOrder()
+  + cancelOrder()
 }
 
 class PurchaseOrder {
-    + poId: String
-    + customerName: String
-    + address: String
-    + dateReceived: Date
-    + status: String
+  - orderId: String
+  - customerDetails: Customer
+  - items: List<OrderItem>
+  - status: String
+  + create()
+  + updateStatus()
+}
+
+class Customer {
+  - name: String
+  - address: String
+  - phone: String
+  - contactPerson: String
 }
 
 class OrderItem {
-    + itemId: String
-    + quantity: Integer
-    + totalPrice: Double
+  - productId: String
+  - quantity: int
+  - totalPrice: float
+}
+
+class ProductCatalog {
+  + getProductDetails(productIds: List<String>): ProductDetails[]
+}
+
+class ProductDetails {
+  - type: String
+  - title: String
+  - handlingInstructions: String
 }
 
 class FinanceSystem {
-    + validateCredit(): Boolean
+  + checkCreditWorthiness(customer: Customer): boolean
 }
 
 class DeliverySystem {
-    + deliverGoods(): String
+  + scheduleDelivery(
+    customer: Customer,
+    orderId: String,
+    items: List<ProductDeliveryInfo>
+  ): String
 }
 
-Maintainer --> Product : maintains
-Clerk --> PurchaseOrder : processes
-Product <|-- Book
-Product <|-- Software
-Product <|-- Toy
-PurchaseOrder "1" *-- "1..*" OrderItem : contains
-OrderItem --> "1" Product : references
-OrderFulfillmentSystem --> FinanceSystem : validates credit
-OrderFulfillmentSystem --> DeliverySystem : arranges delivery
+class ProductDeliveryInfo {
+  - productId: String
+  - quantity: int
+  - type: String
+  - title: String
+  - handlingInstructions: String
+}
+
+' ==== Relationships ====
+Clerk --> OrderEntryScreen : "Interacts with"
+OrderEntryScreen --> OrderController : "Submits to"
+OrderController --> PurchaseOrder : "Manages"
+OrderController --> FinanceSystem : "Validates credit"
+OrderController --> ProductCatalog : "Retrieves details"
+OrderController --> DeliverySystem : "Requests delivery"
+PurchaseOrder "1" *-- "1" Customer : "Contains"
+PurchaseOrder "1" *-- "*" OrderItem : "Has items"
+ProductCatalog "1" --> "*" ProductDetails : "Provides"
+DeliverySystem --> ProductDeliveryInfo : "Uses for shipping"
+
+' ==== Notes ====
+note top of OrderController
+  Orchestrates the entire order flow:
+  1. Validates data
+  2. Checks credit
+  3. Retrieves product info
+  4. Initiates delivery
+end note
+
+note right of DeliverySystem
+  Returns delivery status (e.g., "Scheduled", "Failed")
+  to update PurchaseOrder.
+end note
+
 @enduml

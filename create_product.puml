@@ -1,19 +1,40 @@
 @startuml CreateProductSequence
 actor Maintainer
-participant "OrderFulfillmentSystem" as OFS
-participant "ProductDB" as DB
+boundary "ProductCreationForm" as Form
+control "ProductController" as Controller
+entity "ProductValidator" as Validator
+entity "Product" as Product
+entity "ProductDB" as DB
 
-Maintainer -> OFS: Select "Create Product"
-OFS --> Maintainer: Display Product Form
-Maintainer -> OFS: Enter Product Details (Type, Title, Price, etc.)
-OFS -> OFS: Validate Data Format
-OFS -> DB: Check if Product Exists
-alt Product Does Not Exist
-    DB --> OFS: Confirmation
-    OFS -> DB: Create Product Record
-    OFS --> Maintainer: Success Message
-else Product Exists
-    DB --> OFS: Error
-    OFS --> Maintainer: "Product Exists, Creation Not Allowed"
+Maintainer -> Form: Selects "Create Product"
+Form --> Maintainer: Displays product creation form
+
+Maintainer -> Form: Enters basic details (Title, Type, Unit Price)
+Maintainer -> Form: Selects Product Type (Book/Software/Toy)
+
+alt Book
+    Maintainer -> Form: Enters Publisher, Year
+else Software
+    Maintainer -> Form: Enters Platform, Media
+else Toy
+    Maintainer -> Form: Enters Sex, Box Size, Weight
 end
+
+Form -> Controller: Submit product data
+Controller -> Validator: Validate data format
+Validator --> Controller: Validation result
+
+alt Valid Data
+    Controller -> Product: Create new product instance
+    Product -> DB: Save product record
+    DB --> Product: Confirmation
+    Product --> Controller: Success notification
+    Controller --> Form: Display success message
+    Form --> Maintainer: Show confirmation
+else Invalid Data
+    Validator --> Controller: Error details
+    Controller --> Form: Display error message
+    Form --> Maintainer: Show validation errors
+end
+
 @enduml
