@@ -1,0 +1,66 @@
+@startuml OrderFulfillmentClassDiagram
+class Maintainer {
+    + maintainerId: String
+    + name: String
+}
+
+class Clerk {
+    + clerkId: String
+    + name: String
+}
+
+class Product {
+    + productId: String
+    + title: String
+    + type: Enum<Book, Software, Toy>
+    + unitPrice: Double
+}
+
+class Book {
+    + publisher: String
+    + yearOfPublishing: Integer
+}
+
+class Software {
+    + platform: String
+    + media: String
+}
+
+class Toy {
+    + sex: String
+    + boxSize: String
+    + weight: Double
+}
+
+class PurchaseOrder {
+    + poId: String
+    + customerName: String
+    + address: String
+    + dateReceived: Date
+    + status: String
+}
+
+class OrderItem {
+    + itemId: String
+    + quantity: Integer
+    + totalPrice: Double
+}
+
+class FinanceSystem {
+    + validateCredit(): Boolean
+}
+
+class DeliverySystem {
+    + deliverGoods(): String
+}
+
+Maintainer --> Product : maintains
+Clerk --> PurchaseOrder : processes
+Product <|-- Book
+Product <|-- Software
+Product <|-- Toy
+PurchaseOrder "1" *-- "1..*" OrderItem : contains
+OrderItem --> "1" Product : references
+OrderFulfillmentSystem --> FinanceSystem : validates credit
+OrderFulfillmentSystem --> DeliverySystem : arranges delivery
+@enduml

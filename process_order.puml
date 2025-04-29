@@ -1,0 +1,21 @@
+@startuml ProcessOrderSequence
+actor Clerk
+participant "OrderFulfillmentSystem" as OFS
+participant "FinanceSystem" as FS
+participant "DeliverySystem" as DS
+
+Clerk -> OFS: Process Order (Customer Details, PO Items)
+OFS -> OFS: Validate Data Format
+OFS -> FS: Validate Credit Worthiness
+alt Credit Approved
+    OFS -> OFS: Retrieve Product Details
+    OFS -> DS: Deliver Goods (Customer, PO, Product Details)
+    DS --> OFS: Delivery Status
+    OFS -> OFS: Store PO with Status
+    OFS --> Clerk: Order Status
+else Credit Rejected
+    FS --> OFS: Error Message
+    OFS -> OFS: Cancel and Store PO
+    OFS --> Clerk: Order Cancelled
+end
+@enduml

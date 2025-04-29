@@ -1,0 +1,19 @@
+@startuml CreateProductSequence
+actor Maintainer
+participant "OrderFulfillmentSystem" as OFS
+participant "ProductDB" as DB
+
+Maintainer -> OFS: Select "Create Product"
+OFS --> Maintainer: Display Product Form
+Maintainer -> OFS: Enter Product Details (Type, Title, Price, etc.)
+OFS -> OFS: Validate Data Format
+OFS -> DB: Check if Product Exists
+alt Product Does Not Exist
+    DB --> OFS: Confirmation
+    OFS -> DB: Create Product Record
+    OFS --> Maintainer: Success Message
+else Product Exists
+    DB --> OFS: Error
+    OFS --> Maintainer: "Product Exists, Creation Not Allowed"
+end
+@enduml

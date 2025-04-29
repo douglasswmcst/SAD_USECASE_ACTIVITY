@@ -1,0 +1,26 @@
+@startuml DeleteProductSequence
+actor Maintainer
+participant "OrderFulfillmentSystem" as OFS
+participant "ProductDB" as DB
+participant "OrderDB" as ODB
+
+Maintainer -> OFS: Select "Delete Product"
+OFS --> Maintainer: Prompt for Product ID
+Maintainer -> OFS: Enter Product ID
+OFS -> DB: Retrieve Product Details
+alt Product Found
+    DB --> OFS: Product Details
+    OFS -> ODB: Check for Outstanding Orders
+    alt No Orders Exist
+        ODB --> OFS: Confirmation
+        OFS -> DB: Delete Product
+        OFS --> Maintainer: Success Message
+    else Orders Exist
+        ODB --> OFS: Error
+        OFS --> Maintainer: "Order Item Exists, Deletion Not Allowed"
+    end
+else Product Not Found
+    DB --> OFS: Error
+    OFS --> Maintainer: "Product Not Found"
+end
+@enduml

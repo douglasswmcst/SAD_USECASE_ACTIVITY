@@ -1,0 +1,72 @@
+@startuml BankApplicationClassDiagram
+
+' Customer class
+class Customer {
+  - ID: String
+  - Name: String
+  - Address: String
+  - EmploymentDetails: Employment
+  - AccountNumbers: List<String>
+}
+
+' Employment Details composition class
+class Employment {
+  - CompanyName: String
+  - TelephoneNo: String
+  - AnnualSalaryRange: String
+  - Occupation: String
+  - Designation: String
+}
+
+' Abstract Account class
+abstract class Account {
+  - AccountNumber: String
+  - AccountType: String
+  - HolderID: String
+  - JointHolderID: String
+  - BranchName: String
+  - Balance: Double
+}
+
+' Saving Account class
+class SavingAccount {
+  - MinimumBalance: Double
+}
+
+' Current Account class
+class CurrentAccount {
+  - LinkedSavingAccountNumber: String
+}
+
+' Branch class
+class Branch {
+  - BranchName: String
+  - Address: String
+}
+
+' ATM Card class
+class ATMCard {
+  - ID: String
+  - CustomerID: String
+  - DateOfIssue: Date
+}
+
+' Relationships
+
+' Customer to Employment (Composition)
+Customer *-- Employment : has >
+
+' Customer to Account (Association)
+Customer "1" -- "0..*" Account : holds >
+
+' Account generalization
+Account <|-- SavingAccount
+Account <|-- CurrentAccount
+
+' Account to Branch (Association)
+Account "1..*" -- "1" Branch : belongs to >
+
+' Customer to ATMCard (Association)
+Customer "1" -- "0..1" ATMCard : has >
+
+@enduml
